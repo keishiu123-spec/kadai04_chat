@@ -5,7 +5,7 @@
 ⚫︎ リアルタイムでやり取りできるチャットといえばLINE。YouTubeの解説動画を観てLINEを再現してみた。
 
 ## ③アプリのデプロイURL
-⚫︎ 
+⚫︎ https://keishiu123-spec.github.io/kadai04_chat/
 
 ## ④アプリのログイン用IDまたはPassword（ある場合）
 ⚫︎ なし
