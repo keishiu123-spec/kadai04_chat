@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Firebase:LINE風アプリ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+<div class="container">
+    <div class="header">
+      <h1>ライン風アプリ</h1>
+    </div>
+
+    <div class="chat-area" id="chat-area"></div>
+
+    <div class="message-area-container">
+        <div class="user-input-area">
+            <input type="text" id="uname" value="太郎" placeholder="名前を入力してください">
+        </div>
+    </div>
+
+    <div class="message-area">
+        <div class="message-area-text">
+            <textarea id="text" placeholder="メッセージを入力"></textarea>
+        </div>
+        <div class="message-area-button">
+            <button id="send" class="send-btn">送信</button>
+        </div>
+    </div>
+</div>
+<!--/ コンテンツ表示画面 -->
+
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved } 
+  from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+
+  //これ重要かも: 分離したfirebaseConfigファイルを別管理
+  import { firebaseConfig } from "./firebase-config.js";
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);　//初期化
+  const db  = getDatabase(app); //RealtimeDBに接続
+  const dbRef = ref(db,"chat"); //RealtimeDB内の"chat"を参照  
+
+
+//送信イベント
+
+$("#send").on("click",function(){
+
+  //未入力なら送信しない設定を追加
+  if($("#uname").val() === "" || $("#text").val() === ""){
+          alert("名前とメッセージを入力してください");
+          return;
+      }
+
+  //Firebaseに送るデータをオブジェクト形式で作成
+    const msg = {
+        uname: $("#uname").val(),
+        text: $("#text").val()
+    }
+    const newPostRef = push(dbRef); //ユニークKEYを生成
+    set(newPostRef, msg);           //"chat"にユニークKEYをつけてオブジェクトデータを登録
+
+  // 送信後にテキストエリアを空にする
+    $("#text").val("");
+  })
+
+
+//受信イベント
+onChildAdded(dbRef, function(data){
+    const msg  = data.val();    //オブジェクトデータを取得し、変数msgに代入
+    const key  = data.key;      //ユニークKEYを取得し、変数keyに代入
+
+    // 現在の入力欄の名前を取得
+    const currentUserName = $("#uname").val(); 
+
+
+    // 判定機能　自分か相手かを見極めてCSSクラスを決定　★ここ難しいけど重要
+    // 入力欄の名前＝メッセージの送信者名　my-messageクラスを適用
+    const messageClass = (currentUserName === msg.uname && currentUserName !== "") ? 'my-message' : 'other-message';
+
+
+    //LINE風にするためにHTMLを組み立てる
+    let h = '<div class="message ' + messageClass + '">';
+        h += '<div class="message-name">' + msg.uname + '</div>';
+        h += '<div class="bubble">' + msg.text + '</div>';
+        h += '</div>';
+
+    //chat-areaに追加表示
+      $("#chat-area").append(h);
+
+    //スクロール機能追加
+      const chatArea = document.getElementById('chat-area');
+      chatArea.scrollTop = chatArea.scrollHeight;
+  });
+</script>
+</body>
+</html>
+

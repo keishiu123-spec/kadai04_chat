@@ -1,0 +1,196 @@
+@charset "utf-8";
+
+/* 全体のフォントとリセット */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+/* スマホ画面風コンテナ */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #7494c0; 
+}
+
+/* ヘッダー */
+.header {
+    background: #fff;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    flex-shrink: 0;
+    background-color: #f7f7f7; 
+}
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* チャットエリア */
+.chat-area {
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 20px;
+}
+
+/* --- 吹き出しのデザインと配置 --- */
+
+/* メッセージ */
+.message {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 重要！左側へ　相手のメッセージ (other-message) */
+.other-message {
+    align-items: flex-start;
+}
+
+/* 重要！右側へ　自分のメッセージ */
+.my-message {
+    align-items: flex-end;
+}
+
+/* 名前 */
+.message-name {
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+/* 自分の名前の位置を調整 */
+.my-message .message-name {
+    align-self: flex-end;
+    margin-right: 5px;
+    margin-left: 0; 
+}
+/* 相手の名前の位置を調整 */
+.other-message .message-name {
+    align-self: flex-start;
+    margin-left: 5px;
+    margin-right: 0; 
+}
+
+
+/* 吹き出し本体（共通） */
+.bubble {
+    padding: 10px 15px;
+    border-radius: 15px;
+    position: relative;
+    max-width: 70%;
+    word-wrap: break-word;
+    font-size: 16px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+/* 相手の吹き出し（白） */
+.other-message .bubble {
+    background: #fff;
+}
+/* 相手のしっぽ（左側） */
+.other-message .bubble::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: -8px;
+    border-top: 8px solid transparent;
+    border-right: 10px solid #fff;
+    border-bottom: 8px solid transparent;
+}
+
+
+/* 自分の吹き出し（緑） */
+.my-message .bubble {
+    background: #a9e049;
+}
+
+/* 自分のしっぽ（右側） */
+.my-message .bubble::before {
+    /* 相手のしっぽ（左側）を無効化 */
+    content: none; 
+}
+.my-message .bubble::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: -8px;
+    border-top: 8px solid transparent;
+    border-left: 10px solid #a9e049;
+    border-bottom: 8px solid transparent;
+}
+
+
+/* --- 入力エリア --- */
+
+/* 名前入力欄を含むエリア */
+.message-area-container {
+    flex-shrink: 0;
+    background: #fff;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+}
+
+/* 名前入力欄のスタイル */
+.user-input-area {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+#uname {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* 入力エリア（メッセージとボタン） */
+.message-area {
+    display: flex;
+    align-items: flex-end;
+}
+
+.message-area-text {
+    flex: 1;
+    margin-right: 10px;
+}
+
+#text {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+}
+
+.message-area-button {
+    width: 60px;
+    flex-shrink: 0;
+}
+
+.send-btn {
+    width: 100%;
+    height: 40px;
+    background-color: #0265ee;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.send-btn:hover {
+    opacity: 0.9;
+}
