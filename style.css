@@ -1,196 +1,296 @@
-@charset "utf-8";
-
-/* 全体のフォントとリセット */
-body, html {
+/* 設定 */
+body {
+    font-family: sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
     margin: 0;
     padding: 0;
-    height: 100%;
-    font-family: "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
 }
 
-/* スマホ画面風コンテナ */
 .container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background-color: #7494c0; 
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px 10px;
 }
 
-/* ヘッダー */
-.header {
-    background: #fff;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
+header h1 {
     text-align: center;
-    flex-shrink: 0;
-    background-color: #f7f7f7; 
-}
-.header h1 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
+    color: #5d0202;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 20px;
 }
 
-/* チャットエリア */
-.chat-area {
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 20px;
-}
-
-/* --- 吹き出しのデザインと配置 --- */
-
-/* メッセージ */
-.message {
-    margin-bottom: 15px;
+/* メインレイアウト */
+.main-content {
     display: flex;
-    flex-direction: column;
+    gap: 20px;
+    flex-wrap: wrap; 
 }
 
-/* 重要！左側へ　相手のメッセージ (other-message) */
-.other-message {
-    align-items: flex-start;
+/* 記録セクション */
+.record-section {
+    flex: 2 1 65%;
+    min-width: 300px;
+    order: 1; 
 }
 
-/* 重要！右側へ　自分のメッセージ */
-.my-message {
-    align-items: flex-end;
+/* AIセクション */
+.ai-section {
+    flex: 1 1 30%;
+    min-width: 250px; 
+    order: 2;
 }
 
-/* 名前 */
-.message-name {
-    font-size: 12px;
+/* 記録入力エリア */
+.input-card {
+    background: #ffffff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-card h2 {
+    color: #5d0202;
+    font-size: 1.4em;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 5px;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.input-card input,
+.input-card textarea {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.input-card button {
+    width: 100%;
+    padding: 10px;
+    background-color: #f7b440;
     color: #333;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.input-card button:hover {
+    background-color: #f5a020;
+}
+
+/* 記録表示 (フィード) */
+.record-card {
+    background: #ffffff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.2s;
+}
+
+.record-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #e0e0e0;
+    padding-bottom: 5px;
     margin-bottom: 5px;
 }
 
-/* 自分の名前の位置を調整 */
-.my-message .message-name {
-    align-self: flex-end;
-    margin-right: 5px;
-    margin-left: 0; 
-}
-/* 相手の名前の位置を調整 */
-.other-message .message-name {
-    align-self: flex-start;
-    margin-left: 5px;
-    margin-right: 0; 
+.sake-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #5d0202;
 }
 
-
-/* 吹き出し本体（共通） */
-.bubble {
-    padding: 10px 15px;
-    border-radius: 15px;
-    position: relative;
-    max-width: 70%;
-    word-wrap: break-word;
-    font-size: 16px;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+.poster-name {
+    font-size: 0.8em;
+    color: #777;
 }
 
-/* 相手の吹き出し（白） */
-.other-message .bubble {
-    background: #fff;
-}
-/* 相手のしっぽ（左側） */
-.other-message .bubble::before {
-    content: "";
-    position: absolute;
-    top: 10px;
-    left: -8px;
-    border-top: 8px solid transparent;
-    border-right: 10px solid #fff;
-    border-bottom: 8px solid transparent;
+.review-text {
+    line-height: 1.5;
+    margin: 10px 0;
+    white-space: pre-wrap;
 }
 
-
-/* 自分の吹き出し（緑） */
-.my-message .bubble {
-    background: #a9e049;
+.timestamp {
+    display: block;
+    text-align: right;
+    font-size: 0.7em;
+    color: #999;
 }
 
-/* 自分のしっぽ（右側） */
-.my-message .bubble::before {
-    /* 相手のしっぽ（左側）を無効化 */
-    content: none; 
-}
-.my-message .bubble::after {
-    content: "";
-    position: absolute;
-    top: 10px;
-    right: -8px;
-    border-top: 8px solid transparent;
-    border-left: 10px solid #a9e049;
-    border-bottom: 8px solid transparent;
+/* AI診断エリア */
+.ai-input-card, .ai-output-card {
+    background: #f7f7f7;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0; 
 }
 
+.ai-input-card h2, .ai-output-card h3 {
+    color: #5d0202;
+    border-bottom: 1px solid #ccc; 
+    padding-bottom: 5px;
+    margin-top: 0;
+    font-size: 1.2em;
+}
 
-/* --- 入力エリア --- */
+.ai-intro {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 0;
+}
 
-/* 名前入力欄を含むエリア */
-.message-area-container {
-    flex-shrink: 0;
-    background: #fff;
-    border-top: 1px solid #ccc;
+#aiText {
+    width: calc(100% - 22px);
     padding: 10px;
-}
-
-/* 名前入力欄のスタイル */
-.user-input-area {
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
     margin-bottom: 10px;
-}
-#uname {
-    width: 100%;
-    padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 14px;
     box-sizing: border-box;
+    resize: vertical;
 }
 
-/* 入力エリア（メッセージとボタン） */
-.message-area {
-    display: flex;
-    align-items: flex-end;
-}
-
-.message-area-text {
-    flex: 1;
-    margin-right: 10px;
-}
-
-#text {
+#getDiagnosisBtn {
     width: 100%;
-    min-height: 40px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
     padding: 10px;
-    box-sizing: border-box;
-    font-size: 14px;
-    resize: none;
-    outline: none;
-}
-
-.message-area-button {
-    width: 60px;
-    flex-shrink: 0;
-}
-
-.send-btn {
-    width: 100%;
-    height: 40px;
-    background-color: #0265ee;
+    background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+#getDiagnosisBtn:hover {
+    background-color: #0056b3;
+}
+
+/* AI回答表示 */
+#aiResponseArea {
+    min-height: 80px; 
+    padding: 10px;
+    background: #ffffff; 
+    border: 1px solid #ddd; 
+    border-radius: 4px;
+    font-size: 0.9em; 
+}
+
+/* 診断結果の色分け */
+.diagnosis-result {
+    font-size: 1.4em;
+    font-weight: bold;
+    padding: 5px 0;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.normal-diagnosis {
+    color: #28a745;
+}
+
+.slight-diagnosis {
+    color: #ffc107;
+}
+
+.drunk-diagnosis {
+    color: #dc3545;
+}
+
+.ai-result {
+    line-height: 1.6;
+    color: #444;
+}
+
+.initial-message, .loading-message, .error-message {
+    font-style: italic;
+    color: #999;
+}
+
+.loading-message {
+    color: #007bff;
     font-weight: bold;
 }
 
-.send-btn:hover {
-    opacity: 0.9;
+.error-message {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 900px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .record-section, .ai-section {
+        flex-grow: 1;
+        width: 100%;
+        min-width: auto;
+        order: unset; 
+    }
+}
+
+/* --- 達人画像追加 --- */
+
+.ai-master-image {
+    /* 画像を右寄せ */
+    text-align: right;
+    margin-top: 15px; /* コメント部分との余白 */
+}
+
+.ai-master-image img {
+    /* 画像をai-output-cardの80%に制限 */
+    max-width: 80%;
+    /* 高さの比率を維持 */
+    height: auto; 
+}
+
+/* モバイル表示時の調整 */
+@media (max-width: 900px) {
+    .ai-master-image img {
+        /* モバイルでは画像を少し小さく表示 */
+        max-width: 60%; 
+    }
+}
+
+/* --- 有料会員リンクのスタイル --- */
+.premium-link {
+    display: block;
+    text-align: center;
+    margin: 0 auto 20px; /* 上下20px、左右中央揃え */
+    padding: 10px 15px;
+    background-color: #f6f47b; /* 黄色/オレンジ系 */
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    max-width: 400px; /* 最大幅を制限して目立たせる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s;
+}
+
+.premium-link:hover {
+    background-color: #eff77a;
 }

@@ -1,2 +1,4 @@
 # Firebaseの設定ファイル（機密情報を含むためGit管理対象外にする）
 firebase-config.js
+
+openai-config.js

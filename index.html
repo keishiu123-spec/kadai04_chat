@@ -2,36 +2,59 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>Firebase:LINE風アプリ</title>
+<title>日本酒記録＋達人コメント</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- コンテンツ表示画面 -->
 <div class="container">
-    <div class="header">
-      <h1>ライン風アプリ</h1>
-    </div>
+    <header>
+        <h1>🍶 日本酒愛好家が集まる　SAKEプラットフォーム</h1>
+    </header>
 
-    <div class="chat-area" id="chat-area"></div>
+    <a href="premium.html" class="premium-link">
+        達人級の限定機能はこちら (有料会員ページへ)
+    </a>
 
-    <div class="message-area-container">
-        <div class="user-input-area">
-            <input type="text" id="uname" value="太郎" placeholder="名前を入力してください">
+    <div class="main-content">
+
+        <div class="record-section">
+            <div class="input-card">
+                <h2>記録を投稿</h2>
+                <input type="text" id="uname" value="記録者" placeholder="名前">
+                <input type="text" id="sakeName" placeholder="銘柄名">
+                <textarea id="text" rows="3" placeholder="感想"></textarea>
+                <button id="send">投稿</button>
+            </div>
+            
+            <div id="record-area">
+                </div>
+        </div>
+
+        <div class="ai-section">
+            <div class="ai-input-card">
+                <h2>AI酒達人コメント</h2>
+                <p class="ai-intro">あなたの感想を作成します。</p>
+
+                <label for="aiReviewText">書きたい感想を入力:</label>
+                <textarea id="aiReviewText" rows="3" placeholder="例: サイコーすぎて至高の境地が見える..."></textarea>
+                <button id="getDiagnosisBtn">達人のコメントを聞く</button>
+            </div>
+            
+            <div class="ai-output-card">
+                <h3>達人の格言</h3>
+                <div id="aiResponseArea">
+                    <p class="initial-message">達人コメント表示</p>
+                </div>
+
+                <div class="ai-master-image">
+                    <img src="images/tatujin.png" alt="日本酒の達人">
+                </div>
+
+            </div>
         </div>
     </div>
-
-    <div class="message-area">
-        <div class="message-area-text">
-            <textarea id="text" placeholder="メッセージを入力"></textarea>
-        </div>
-        <div class="message-area-button">
-            <button id="send" class="send-btn">送信</button>
-        </div>
-    </div>
-</div>
-<!--/ コンテンツ表示画面 -->
-
+  </div>
 
 
 <!-- JQuery -->
@@ -39,6 +62,7 @@
 <!-- JQuery -->
 
 
+<!-- ここから設定部分 -->
 <!--** 以下Firebase **-->
 <script type="module">
   // Import the functions you need from the SDKs you need
@@ -49,66 +73,125 @@
   // https://firebase.google.com/docs/web/setup#available-libraries
 
 
-  //これ重要かも: 分離したfirebaseConfigファイルを別管理
-  import { firebaseConfig } from "./firebase-config.js";
+  // ※※※※※※重要パート
+  // ※※※※※※重要　Firebase別管理
+  import { firebaseConfig } from "./firebase-config.js"; 
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);　//初期化
-  const db  = getDatabase(app); //RealtimeDBに接続
-  const dbRef = ref(db,"chat"); //RealtimeDB内の"chat"を参照  
+  // ※※※※※※重要　OPENAI別管理
+  import { OPENAI_API_KEY, OPENAI_ENDPOINT } from "./openai-config.js";
+  // ※※※※※※重要パート
 
 
-//送信イベント
+  // Firebase初期化
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+  const dbRef = ref(db, "sake_records"); // DB参照名
 
-$("#send").on("click",function(){
 
-  //未入力なら送信しない設定を追加
-  if($("#uname").val() === "" || $("#text").val() === ""){
-          alert("名前とメッセージを入力してください");
-          return;
+  //OPENAI設定部分
+  async function getSimpleAiResponse(prompt) {
+      // 達人ペルソナを設定
+      const systemMessage = "あなたは日本酒を極めた達人です。ユーザーの感想に対し、深い知識とユーモアを込めて格言のようなコメントを一言で返してください。";
+
+      try {
+          const response = await fetch(OPENAI_ENDPOINT, { 
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${OPENAI_API_KEY}` 
+              },
+              body: JSON.stringify({
+                  model: "gpt-3.5-turbo",
+                  messages: [
+                      { role: "system", content: systemMessage },
+                      { role: "user", content: prompt }
+                  ],
+                  temperature: 0.8, // ユーモアを出すため高めに設定
+                  max_tokens: 150
+              })
+          });
+          if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(`APIエラー: ${response.status} - ${errorData.error.message}`);
+          }
+          
+          const data = await response.json();
+          return data.choices[0].message.content.trim(); 
+
+      } catch (error) {
+          // 修正: catchブロックでのエラー処理とreturnを追加
+          console.error("OpenAI通信失敗:", error);
+          return `達人：「フム...何やら通信機が不調じゃ。ワシの言葉が届かぬ。やり直すが良い。」`;
       }
+      // 修正: 関数を閉じる波括弧を追加
+  }
 
-  //Firebaseに送るデータをオブジェクト形式で作成
-    const msg = {
-        uname: $("#uname").val(),
-        text: $("#text").val()
-    }
-    const newPostRef = push(dbRef); //ユニークKEYを生成
-    set(newPostRef, msg);           //"chat"にユニークKEYをつけてオブジェクトデータを登録
+  //OPENAIコメント部分
 
-  // 送信後にテキストエリアを空にする
-    $("#text").val("");
-  })
+  $("#getDiagnosisBtn").on("click", async function() {
+      const reviewText = $("#aiReviewText").val().trim();
+      const aiResponseArea = $("#aiResponseArea");
 
+      // ユーザープロンプトを作成
+      const userPrompt = `ユーザーの今の感想は「${reviewText}」だ。この酔いに達人としての一言を。`;
+      
+      // APIを呼び出し
+      const aiComment = await getSimpleAiResponse(userPrompt);
+      
+      // 投稿用の入力欄にも反映（操作性向上）
+      $("#text").val(reviewText); 
 
-//受信イベント
-onChildAdded(dbRef, function(data){
-    const msg  = data.val();    //オブジェクトデータを取得し、変数msgに代入
-    const key  = data.key;      //ユニークKEYを取得し、変数keyに代入
-
-    // 現在の入力欄の名前を取得
-    const currentUserName = $("#uname").val(); 
-
-
-    // 判定機能　自分か相手かを見極めてCSSクラスを決定　★ここ難しいけど重要
-    // 入力欄の名前＝メッセージの送信者名　my-messageクラスを適用
-    const messageClass = (currentUserName === msg.uname && currentUserName !== "") ? 'my-message' : 'other-message';
-
-
-    //LINE風にするためにHTMLを組み立てる
-    let h = '<div class="message ' + messageClass + '">';
-        h += '<div class="message-name">' + msg.uname + '</div>';
-        h += '<div class="bubble">' + msg.text + '</div>';
-        h += '</div>';
-
-    //chat-areaに追加表示
-      $("#chat-area").append(h);
-
-    //スクロール機能追加
-      const chatArea = document.getElementById('chat-area');
-      chatArea.scrollTop = chatArea.scrollHeight;
+      // 結果を画面に表示
+      aiResponseArea.html(`
+          <p class="diagnosis-result">達人からの格言</p>
+          <p class="ai-result">${aiComment.replace(/\n/g, '<br>')}</p>
+      `);
   });
+
+
+  // 送信イベント
+  $("#send").on("click", function(){
+    const uname = $("#uname").val();
+    const sakeName = $("#sakeName").val();
+    const text = $("#text").val();
+    
+    if (!uname || !sakeName || !text) {
+        alert("全て入力してください！");
+        return;
+    }
+
+      // Firebaseに送るデータを作成　※時間も設定
+    const newPostRef = push(dbRef);
+    set(newPostRef, {
+        uname: uname,
+        sakeName: sakeName,
+        text: text,
+        timestamp: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
+    });
+
+    // 送信後にテキストエリアを空にする
+    $("#sakeName").val("");
+    $("#text").val("");
+  });
+
+  // 受信イベント
+  onChildAdded(dbRef, function(data){
+    const msg = data.val();   // オブジェクトデータを取得し、変数msgに代入
+    
+    // HTMLの組み立て
+    let h = '<div class="record-card">';
+    h += '<div class="header-line">';
+    h += '<span class="sake-name">' + msg.sakeName + '</span>';
+    h += '<span class="poster-name">by ' + msg.uname + '</span>';
+    h += '</div>';
+    h += '<p class="review-text">' + msg.text + '</p>';
+    h += '<span class="timestamp">' + (msg.timestamp || '') + '</span>';
+    h += '</div>';
+
+    // 一番上に追加してフィード形式にする
+    $("#record-area").prepend(h);
+  });
+
 </script>
 </body>
 </html>
-
